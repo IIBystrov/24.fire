@@ -15,6 +15,7 @@ const ttf2woff = require("gulp-ttf2woff");
 const ttf2woff2 = require("gulp-ttf2woff2");
 const fs = require("fs"); // Подключаем плагин для работы с файловой системой
 const clean = require("gulp-clean");
+const pug = require("gulp-pug");
 
 // Функции 
 
@@ -49,16 +50,24 @@ const fonts = () => {
         .pipe(dest("./dist/fonts/"))
 }
 
-// Работа с модулями html
-const htmlInclude = () => {
-    return src(["./src/index.html"])
-        .pipe(fileinclude({
-            prefix: "@",
-            basepath: "@file",
-        }))
+// // Работа с модулями html
+// const htmlInclude = () => {
+//     return src(["./src/index.html"])
+//         .pipe(fileinclude({
+//             prefix: "@",
+//             basepath: "@file",
+//         }))
+//         .pipe(dest("./dist"))
+//         .pipe(browserSync.stream()); // Обновлять браузер
+// }
+
+// Работа с pug
+const pug2html = () => {
+    return src("src/*.pug")
+        .pipe(pug())
         .pipe(dest("./dist"))
-        .pipe(browserSync.stream()); // Обновлять браузер
-}
+        .pipe(browserSync.stream());
+};
 
 // Работа с изображениями
 const imgToDist = () => {
@@ -109,7 +118,7 @@ const watchFiles = () => {
     });
 
     watch("./src/scss/**/*.scss", styles); // Директория слежения и функция после изменения файла
-    watch("./src/index.html", htmlInclude);
+    watch("./src/index.pug", pug2html);
     watch("./src/img/**.jpg", imgToDist);
     watch("./src/img/**.png", imgToDist);
     watch("./src/img/**.jpeg", imgToDist);
@@ -124,4 +133,4 @@ exports.styles = styles;
 exports.watchFiles = watchFiles;
 exports.scripts = scripts;
 
-exports.default = series(distClean, parallel(htmlInclude, scripts, fonts, resources, imgToDist, svgSprites), styles, watchFiles);
+exports.default = series(distClean, parallel( pug2html, scripts, fonts, resources, imgToDist, svgSprites), styles, watchFiles);
